@@ -7,15 +7,18 @@ import (
 )
 
 func check(link string, c chan string) {
-	_, err := http.Get(link)
+	client := http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(link)
 	if err != nil {
-		c <- link + " might be down😪"
+		c <- "🔴 " + link + " might be down"
 		return
 	}
-	c <- link + " is up and running!✅"
+	defer resp.Body.Close() 
+	c <- "✅ " + link + " up and running"
 }
 
 func main() {
+	start := time.Now() 
 	links := []string{
 		"https://google.com",
 		"https://golang.org",
@@ -31,5 +34,6 @@ func main() {
 	for i := 0; i < len(links); i++ {
 		fmt.Println(<-c)
 	}
-	fmt.Printf("Done🙂took %v\n", time.Now().Format("15:04:05"))
+
+	fmt.Printf("\nDone🙂 Total time: %v\n", time.Since(start))
 }
